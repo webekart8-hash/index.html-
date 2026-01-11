@@ -1,0 +1,11 @@
+body { font-family: 'Roboto', sans-serif; }
+.logo { width: auto; }
+.category-link { cursor: pointer; color: #2874f0; font-weight: 500; }
+.category-link:hover { color: #fb641b; }
+.product-card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+.product-card img { height: 200px; object-fit: cover; }
+.product-card .card-body { padding: 15px; }
+.btn-warning { background-color: #fb641b; border-color: #fb641b; }
+.btn-warning:hover { background-color: #e55a1b; }
+.btn-primary { background-color: #2874f0; border-color: #2874f0; }
+.btn-primary:hover { background-color: #1e5bb8; }
