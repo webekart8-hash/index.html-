@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cart - Flipkart Clone</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bg-white border-bottom">
+    <div class="container d-flex align-items-center py-2">
+      <img src="images/flipkart-logo.png" alt="Flipkart" class="logo mr-4" style="height: 40px;">
+      <a href="index.html" class="text-dark">Home</a>
+    </div>
+  </header>
+
+  <div class="container my-4">
+    <h3>Your Cart</h3>
+    <div id="cartItems"></div>
+    <div class="text-right">
+      <h4 id="totalPrice">Total: ₹0</h4>
+      <button class="btn btn-warning btn-lg" id="checkoutBtn">Place Order</button>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    let cart = [];
+    $(document).ready(function() {
+      loadCart();
+    });
+
+    function loadCart() {
+      $.get('/api/cart', function(data) {
+        cart = data;
+        $('#cartItems').empty();
+        let total = 0;
+        cart.forEach((item, index) => {
+          total += item.price;
+          $('#cartItems').append(`
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+              <img src="${item.image}" style="width: 50px; height: 50px; object-fit: cover;" alt="${item.name}">
+              <span>${item.name} - ₹${item.price}</span>
+              <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remove</button>
+            </div>
+          `);
+        });
+        $('#totalPrice').text(`Total: ₹${total}`);
+      });
+    }
+
+    function removeItem(index) {
+      $.ajax({ url: `/api/cart/remove/${index}`, type: 'DELETE', success: loadCart });
+    }
+
+    $('#checkoutBtn').click(function() {
+      $.post('/api/create-order', {}, function(data) {
+        const options = {
+          key: 'rzp_test_your_key_here', // Same as backend
+          amount: data.amount,
+          currency: 'INR',
+          order_id: data.orderId,
+          name: 'Flipkart Clone',
+          description: 'Purchase',
+          handler: function(response) {
+            $.post('/api/confirm-order', { paymentId: response.razorpay_payment_id, orderId: data.orderId }, function() {
+              window.location.href = 'order-success.html?orderId=' + data.orderId;
+            });
+          },
+          prefill: { method: 'upi' } // Forces UPI
+        };
+        const rzp = new Razorpay(options);
+        rzp.open();
+      });
+    });
+  </script>
+</body>
+</html>
